@@ -27,8 +27,11 @@ const (
 )
 
 func NewBufferedClient(endpoint string, httpClient *http.Client, onError func(err error)) *BufferedClient {
-	if endpoint == "" {
+	switch endpoint {
+	case "", "https":
 		endpoint = GaHTTPS
+	case "http":
+		endpoint = GaHTTP
 	}
 	return &BufferedClient{
 		endpoint: endpoint,
