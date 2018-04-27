@@ -20,6 +20,7 @@ type writeStringer interface {
 	fmt.Stringer
 }
 
+// Buffer accumulates messages and sends them on Flush() or if limit on queue depth reached
 type Buffer interface {
 	Queue(message Message) error
 	Flush() error

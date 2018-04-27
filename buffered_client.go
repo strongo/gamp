@@ -2,12 +2,13 @@ package gamp
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 	"sync"
-	"errors"
 )
 
+// BufferedClient accumulates GA messages
 type BufferedClient struct {
 	sync.Mutex
 	endpoint   string
@@ -20,12 +21,16 @@ type BufferedClient struct {
 const (
 	gaHost = "www.google-analytics.com"
 
-	GaHTTPS    = "https://" + gaHost + "/"
+	// GaHTTPS is secure endpoint for Google Analytics measurement protocol API
+	GaHTTPS = "https://" + gaHost + "/"
+
+	// GaHTTP is non secure endpoint for Google Analytics measurement protocol API
 	GaHTTP = "http://" + gaHost + "/"
 
 	bufferSizeLimit = 16*1024*1024 - 1
 )
 
+// NewBufferedClient creates new buffered client
 func NewBufferedClient(endpoint string, httpClient *http.Client, onError func(err error)) *BufferedClient {
 	switch endpoint {
 	case "", "https":
@@ -34,18 +39,21 @@ func NewBufferedClient(endpoint string, httpClient *http.Client, onError func(er
 		endpoint = GaHTTP
 	}
 	return &BufferedClient{
-		endpoint: endpoint,
+		endpoint:   endpoint,
 		httpClient: httpClient,
 		onError:    onError,
 	}
 }
 
+// QueueDepth huw many messages accumulated
 func (api *BufferedClient) QueueDepth() int {
 	return api.queueDepth
 }
 
+// ErrNoTrackingID is returned if GA message has no tracking ID
 var ErrNoTrackingID = errors.New("no tracking ID")
 
+// Queue adds GA message to buffer
 func (api *BufferedClient) Queue(message Message) error {
 	if message.GetTrackingID() == "" {
 		return ErrNoTrackingID
@@ -70,12 +78,13 @@ func (api *BufferedClient) Queue(message Message) error {
 		return api.Queue(message)
 	}
 
-	if api.queueDepth += 1; api.queueDepth == 20 {
+	if api.queueDepth++; api.queueDepth == 20 {
 		return api.flush()
 	}
 	return nil
 }
 
+// Flush sends accumulated messages to GA
 func (api *BufferedClient) Flush() (err error) {
 	api.Lock()
 	defer api.Unlock()
@@ -96,16 +105,16 @@ func (api *BufferedClient) flush() error {
 func (api *BufferedClient) sendSingle() (err error) {
 	url := api.endpoint + "collect?" + api.buffer.String()
 	resp, err := api.httpClient.Get(url)
-	return api.handleApiResponse(url, resp, err)
+	return api.handleAPIResponse(url, resp, err)
 }
 
 func (api *BufferedClient) sendBatch() error {
 	url := api.endpoint + "batch"
 	resp, err := api.httpClient.Post(url, "text/plain", &api.buffer)
-	return api.handleApiResponse(url, resp, err)
+	return api.handleAPIResponse(url, resp, err)
 }
 
-func (api *BufferedClient) handleApiResponse(url string, resp *http.Response, err error) error {
+func (api *BufferedClient) handleAPIResponse(url string, resp *http.Response, err error) error {
 	api.buffer.Reset()
 	api.queueDepth = 0
 	if err != nil {
@@ -116,11 +125,10 @@ func (api *BufferedClient) handleApiResponse(url string, resp *http.Response, er
 	} else if resp != nil {
 		if resp.StatusCode == http.StatusOK {
 			return nil
-		} else {
-			buf := new(bytes.Buffer)
-			buf.ReadFrom(resp.Body)
-			return fmt.Errorf("%v => HTTP status=%v, body: %v", url, resp.StatusCode, buf.String())
 		}
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		return fmt.Errorf("%v => HTTP status=%v, body: %v", url, resp.StatusCode, buf.String())
 	} else {
 		panic("resp is nil")
 	}

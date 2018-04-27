@@ -16,12 +16,11 @@ func TestLive(t *testing.T) {
 		UserLanguage:  "en-en",
 	}
 
-	gaMeasurement := NewBufferedClient(GaHTTPS + "debug/", http.DefaultClient, nil)
+	gaMeasurement := NewBufferedClient(GaHTTPS+"debug/", http.DefaultClient, nil)
 
 	gaEvent := NewEvent("test-category1.2", "test-action2.2", common)
 	gaEvent.Label = "test-label1"
 	gaMeasurement.Queue(gaEvent)
-
 
 	if err := gaMeasurement.Flush(); err != nil {
 		t.Errorf("Failed to flush(): %v", err.Error())

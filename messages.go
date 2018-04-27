@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// Message interface should be implemented by all GA messages
 type Message interface {
 	GetTrackingID() string
 	fmt.Stringer
@@ -16,6 +17,7 @@ type Message interface {
 	Write(w io.Writer) (n int, err error)
 }
 
+// Common properties of GA message
 type Common struct {
 	TrackingID    string `key:"tid" required:"true"`
 	ClientID      string `key:"cid"`
@@ -26,10 +28,12 @@ type Common struct {
 	ApplicationID string `key:"aid"`
 }
 
+// GetTrackingID returns tracking ID of GA message
 func (c Common) GetTrackingID() string {
 	return c.TrackingID
 }
 
+// Event is GA message of 'event' type
 type Event struct {
 	Common
 	Category string `key:"ec" required:"true"`
@@ -40,6 +44,7 @@ type Event struct {
 
 var _ Message = (*Event)(nil)
 
+// Timing is GA message of 'timing' type
 type Timing struct {
 	Common
 	ServerResponseTime uint
@@ -111,14 +116,17 @@ func (c Common) writeRest(w io.Writer) (n int, err error) {
 	return
 }
 
+// NewEvent creates new event
 func NewEvent(category, action string, common Common) Event {
 	return NewEventWithLabel(category, action, "", common)
 }
 
+// NewTiming creates new timing
 func NewTiming(serverResponseTime time.Duration) Timing {
 	return Timing{ServerResponseTime: uint(serverResponseTime.Nanoseconds() / int64(time.Millisecond))}
 }
 
+// NewEventWithLabel creates new event with label
 func NewEventWithLabel(category, action, label string, common Common) Event {
 	e := Event{
 		Category: category,
@@ -132,6 +140,7 @@ func NewEventWithLabel(category, action, label string, common Common) Event {
 	return e
 }
 
+// Validate is checking message for validity
 func (e Event) Validate() error {
 	if e.Category == "" {
 		return errors.New("Missing required parameter: Category")
@@ -142,6 +151,7 @@ func (e Event) Validate() error {
 	return nil
 }
 
+// Write serializes timing message
 func (t Timing) Write(w io.Writer) (n int, err error) {
 	var _n int
 	_n, err = t.Common.write1st(w)
@@ -169,6 +179,7 @@ func (t Timing) Write(w io.Writer) (n int, err error) {
 	return n, err
 }
 
+// Write serializes event message
 func (e Event) Write(w io.Writer) (n int, err error) {
 	var _n int
 
@@ -214,16 +225,17 @@ func (e Event) Write(w io.Writer) (n int, err error) {
 	return n, err
 }
 
-
-
-func (m Event) String() string {
-	return messageToString(m)
+// String returns message as URL encoded string
+func (e Event) String() string {
+	return messageToString(e)
 }
 
-func (m Timing) String() string {
-	return messageToString(m)
+// String returns message as URL encoded string
+func (t Timing) String() string {
+	return messageToString(t)
 }
 
+// Pageview message
 type Pageview struct {
 	Common
 	//DocumentLocation string `key:"dl"`
@@ -234,6 +246,7 @@ type Pageview struct {
 
 var _ Message = (*Pageview)(nil)
 
+// NewPageviewWithDocumentHost creates new pageview message with document host value
 func NewPageviewWithDocumentHost(documentHost, documentPath, documentTitle string) Pageview {
 	return Pageview{
 		DocumentHost:  documentHost,
@@ -242,10 +255,12 @@ func NewPageviewWithDocumentHost(documentHost, documentPath, documentTitle strin
 	}
 }
 
+// String returns message as URL encoded string
 func (m Pageview) String() string {
 	return messageToString(m)
 }
 
+// Write serializes page view message
 func (m Pageview) Write(w io.Writer) (n int, err error) {
 	var _n int
 
@@ -282,6 +297,7 @@ func (m Pageview) Write(w io.Writer) (n int, err error) {
 	return
 }
 
+// Exception message
 type Exception struct {
 	Common
 	Description string `key:"exd"`
@@ -290,6 +306,7 @@ type Exception struct {
 
 var _ Message = (*Exception)(nil)
 
+// NewException creates new exception message
 func NewException(description string, isFatal bool) Exception {
 	return Exception{
 		Description: description,
@@ -301,6 +318,7 @@ func (m Exception) String() string {
 	return messageToString(m)
 }
 
+// Write serializes exception message
 func (m Exception) Write(w io.Writer) (n int, err error) {
 	var _n int
 
