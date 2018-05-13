@@ -12,6 +12,7 @@ import (
 // Message interface should be implemented by all GA messages
 type Message interface {
 	GetTrackingID() string
+	SetTrackingID(string)
 	fmt.Stringer
 	//
 	Write(w io.Writer) (n int, err error)
@@ -31,6 +32,11 @@ type Common struct {
 // GetTrackingID returns tracking ID of GA message
 func (c Common) GetTrackingID() string {
 	return c.TrackingID
+}
+
+// GetTrackingID returns tracking ID of GA message
+func (c *Common) SetTrackingID(v string) {
+	c.TrackingID = v
 }
 
 // Event is GA message of 'event' type
@@ -117,27 +123,27 @@ func (c Common) writeRest(w io.Writer) (n int, err error) {
 }
 
 // NewEvent creates new event
-func NewEvent(category, action string, common Common) Event {
+func NewEvent(category, action string, common Common) *Event {
 	return NewEventWithLabel(category, action, "", common)
 }
 
 // NewTiming creates new timing
-func NewTiming(serverResponseTime time.Duration) Timing {
-	return Timing{ServerResponseTime: uint(serverResponseTime.Nanoseconds() / int64(time.Millisecond))}
+func NewTiming(serverResponseTime time.Duration) *Timing {
+	return &Timing{ServerResponseTime: uint(serverResponseTime.Nanoseconds() / int64(time.Millisecond))}
 }
 
 // NewEventWithLabel creates new event with label
-func NewEventWithLabel(category, action, label string, common Common) Event {
-	e := Event{
+func NewEventWithLabel(category, action, label string, common Common) *Event {
+	event := Event{
 		Category: category,
 		Action:   action,
 		Label:    label,
 		Common:   common,
 	}
-	if err := e.Validate(); err != nil {
+	if err := event.Validate(); err != nil {
 		panic(err.Error())
 	}
-	return e
+	return &event
 }
 
 // Validate is checking message for validity
@@ -226,12 +232,12 @@ func (e Event) Write(w io.Writer) (n int, err error) {
 }
 
 // String returns message as URL encoded string
-func (e Event) String() string {
+func (e *Event) String() string {
 	return messageToString(e)
 }
 
 // String returns message as URL encoded string
-func (t Timing) String() string {
+func (t *Timing) String() string {
 	return messageToString(t)
 }
 
@@ -256,7 +262,7 @@ func NewPageviewWithDocumentHost(documentHost, documentPath, documentTitle strin
 }
 
 // String returns message as URL encoded string
-func (m Pageview) String() string {
+func (m *Pageview) String() string {
 	return messageToString(m)
 }
 
@@ -307,14 +313,14 @@ type Exception struct {
 var _ Message = (*Exception)(nil)
 
 // NewException creates new exception message
-func NewException(description string, isFatal bool) Exception {
-	return Exception{
+func NewException(description string, isFatal bool) *Exception {
+	return &Exception{
 		Description: description,
 		IsFatal:     isFatal,
 	}
 }
 
-func (m Exception) String() string {
+func (m *Exception) String() string {
 	return messageToString(m)
 }
 
