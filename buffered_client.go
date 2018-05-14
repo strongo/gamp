@@ -55,6 +55,9 @@ var ErrNoTrackingID = errors.New("no tracking ID")
 
 // Queue adds GA message to buffer
 func (api *BufferedClient) Queue(message Message) error {
+	if api == nil { // TODO: remove this temporary workaround!
+		return nil
+	}
 	if message.GetTrackingID() == "" {
 		return errors.WithMessage(ErrNoTrackingID, fmt.Sprintf("failed to queue GA message (%v)", message))
 	}
