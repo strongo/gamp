@@ -2,10 +2,10 @@ package gamp
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 	"sync"
-	"github.com/pkg/errors"
 )
 
 // BufferedClient accumulates GA messages
@@ -59,7 +59,7 @@ func (api *BufferedClient) Queue(message Message) error {
 		return nil
 	}
 	if message.GetTrackingID() == "" {
-		return errors.WithMessage(ErrNoTrackingID, fmt.Sprintf("failed to queue GA message (%v)", message))
+		return fmt.Errorf("failed to queue GA message (%v): %w", message, ErrNoTrackingID)
 	}
 	api.Lock()
 	defer api.Unlock()

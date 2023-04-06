@@ -1,11 +1,12 @@
 package gamp
 
 import (
+	"errors"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -16,6 +17,14 @@ type Message interface {
 	fmt.Stringer
 	//
 	Write(w io.Writer) (n int, err error)
+}
+
+func messageToString(m Message) string {
+	buffer := new(strings.Builder)
+	if _, err := m.Write(buffer); err != nil {
+		panic(err.Error())
+	}
+	return buffer.String()
 }
 
 // Common properties of GA message

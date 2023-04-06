@@ -1,0 +1,29 @@
+name: Go CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v[0-9]+\.[0-9]+\.[0-9]+']
+
+jobs:
+
+  go_ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '^1.20'
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          install_components: 'beta,cloud-datastore-emulator'
+
+      - run: gcloud version
+
+      - uses: strongo/go-ci-action@v1.0.1
