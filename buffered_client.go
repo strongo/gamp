@@ -130,7 +130,9 @@ func (api *BufferedClient) handleAPIResponse(url string, resp *http.Response, er
 			return nil
 		}
 		buf := new(bytes.Buffer)
-		buf.ReadFrom(resp.Body)
+		if _, err = buf.ReadFrom(resp.Body); err != nil {
+			return fmt.Errorf("failed to read response body: %w", err)
+		}
 		return fmt.Errorf("%v => HTTP status=%v, body: %v", url, resp.StatusCode, buf.String())
 	} else {
 		panic("resp is nil")

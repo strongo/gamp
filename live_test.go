@@ -20,7 +20,9 @@ func TestLive(t *testing.T) {
 
 	gaEvent := NewEvent("test-category1.2", "test-action2.2", common)
 	gaEvent.Label = "test-label1"
-	gaMeasurement.Queue(gaEvent)
+	if err := gaMeasurement.Queue(gaEvent); err != nil {
+		t.Errorf("Failed to queue(): %v", err.Error())
+	}
 
 	if err := gaMeasurement.Flush(); err != nil {
 		t.Errorf("Failed to flush(): %v", err.Error())
@@ -28,6 +30,7 @@ func TestLive(t *testing.T) {
 
 	gaPageView := NewPageviewWithDocumentHost("test.host", "/test/path2", "Test title")
 	gaPageView.Common = common
+
 	if err := gaMeasurement.Queue(gaPageView); err != nil {
 		t.Error(err)
 	}

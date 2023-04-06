@@ -39,7 +39,7 @@ type Common struct {
 }
 
 // GetTrackingID returns tracking ID of GA message
-func (c Common) GetTrackingID() string {
+func (c *Common) GetTrackingID() string {
 	return c.TrackingID
 }
 
@@ -67,7 +67,7 @@ type Timing struct {
 
 var _ Message = (*Timing)(nil)
 
-func (c Common) write1st(w io.Writer) (n int, err error) {
+func (c *Common) write1st(w io.Writer) (n int, err error) {
 	_n, err := w.Write([]byte("v=1"))
 	n += _n
 	if err != nil {
@@ -83,7 +83,7 @@ func (c Common) write1st(w io.Writer) (n int, err error) {
 	return
 }
 
-func (c Common) writeRest(w io.Writer) (n int, err error) {
+func (c *Common) writeRest(w io.Writer) (n int, err error) {
 	var _n int
 	if c.ClientID != "" {
 		_n, err = w.Write([]byte("&cid=" + url.QueryEscape(c.ClientID)))
@@ -262,8 +262,8 @@ type Pageview struct {
 var _ Message = (*Pageview)(nil)
 
 // NewPageviewWithDocumentHost creates new pageview message with document host value
-func NewPageviewWithDocumentHost(documentHost, documentPath, documentTitle string) Pageview {
-	return Pageview{
+func NewPageviewWithDocumentHost(documentHost, documentPath, documentTitle string) *Pageview {
+	return &Pageview{
 		DocumentHost:  documentHost,
 		DocumentPath:  documentPath,
 		DocumentTitle: documentTitle,

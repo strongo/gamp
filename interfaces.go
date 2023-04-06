@@ -1,10 +1,5 @@
 package gamp
 
-import (
-	"fmt"
-	"io"
-)
-
 // Sender sends analytic messages
 type Sender interface {
 	Send(message Message) error
@@ -15,10 +10,10 @@ type BatchSender interface {
 	SendBatch(messages []Message) error
 }
 
-type writeStringer interface {
-	io.Writer
-	fmt.Stringer
-}
+//type writeStringer interface {
+//	io.Writer
+//	fmt.Stringer
+//}
 
 // Buffer accumulates messages and sends them on Flush() or if limit on queue depth reached
 type Buffer interface {
