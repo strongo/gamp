@@ -20,7 +20,7 @@ jobs:
           go-version: '^1.20'
 
       - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2
         with:
           install_components: 'beta,cloud-datastore-emulator'
 
