@@ -2,6 +2,7 @@ package gamp
 
 import (
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -24,17 +25,29 @@ func TestLive(t *testing.T) {
 		t.Errorf("Failed to queue(): %v", err.Error())
 	}
 
+	checkErr := func(err error, prefix string) {
+		errText := err.Error()
+		if strings.Contains(errText, "HTTP status=404") {
+			t.Logf("WARNING: %s, HTTP status code: %v - replace TrackingID with a vaild one!", prefix, http.StatusNotFound)
+		} else {
+			t.Errorf("%s: %s", prefix, err.Error())
+		}
+	}
+
 	if err := gaMeasurement.Flush(); err != nil {
-		t.Errorf("Failed to flush(): %v", err.Error())
+		checkErr(err, "Failed to flush #1")
+		return
 	}
 
 	gaPageView := NewPageviewWithDocumentHost("test.host", "/test/path2", "Test title")
 	gaPageView.Common = common
 
 	if err := gaMeasurement.Queue(gaPageView); err != nil {
-		t.Error(err)
+		checkErr(err, "Failed to queue #1")
+		return
 	}
 	if err := gaMeasurement.Flush(); err != nil {
-		t.Errorf("Failed to flush(): %v", err.Error())
+		checkErr(err, "Failed to flush #2")
+		return
 	}
 }
