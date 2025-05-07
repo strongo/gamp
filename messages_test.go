@@ -33,7 +33,7 @@ func TestMessageString(t *testing.T) {
 			fmt.Sprintf("v=1&t=pageview&dh=%v&dp=%v&dt=%v", "localhost:8080", url.QueryEscape("/path1/path2"), url.QueryEscape("Title #1")),
 		},
 	} {
-		actual := item.Message.String()
+		actual := item.String()
 		if actual != item.Expected {
 			t.Errorf("\nExpected: %v\n     Got: %v", item.Expected, actual)
 		}

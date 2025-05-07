@@ -158,10 +158,10 @@ func NewEventWithLabel(category, action, label string, common Common) *Event {
 // Validate is checking message for validity
 func (e Event) Validate() error {
 	if e.Category == "" {
-		return errors.New("Missing required parameter: Category")
+		return errors.New("missing required parameter: Category")
 	}
 	if e.Action == "" {
-		return errors.New("Missing required parameter: Action")
+		return errors.New("missing required parameter: Action")
 	}
 	return nil
 }
@@ -169,7 +169,7 @@ func (e Event) Validate() error {
 // Write serializes timing message
 func (t Timing) Write(w io.Writer) (n int, err error) {
 	var _n int
-	_n, err = t.Common.write1st(w)
+	_n, err = t.write1st(w)
 	if n += _n; err != nil {
 		return
 	}
@@ -179,7 +179,7 @@ func (t Timing) Write(w io.Writer) (n int, err error) {
 		return n, err
 	}
 
-	_n, err = t.Common.writeRest(w)
+	_n, err = t.writeRest(w)
 	if n += _n; err != nil {
 		return
 	}
@@ -198,7 +198,7 @@ func (t Timing) Write(w io.Writer) (n int, err error) {
 func (e Event) Write(w io.Writer) (n int, err error) {
 	var _n int
 
-	_n, err = e.Common.write1st(w)
+	_n, err = e.write1st(w)
 	if n += _n; err != nil {
 		return
 	}
@@ -208,7 +208,7 @@ func (e Event) Write(w io.Writer) (n int, err error) {
 		return n, err
 	}
 
-	_n, err = e.Common.writeRest(w)
+	_n, err = e.writeRest(w)
 	if n += _n; err != nil {
 		return
 	}
@@ -279,7 +279,7 @@ func (m *Pageview) String() string {
 func (m Pageview) Write(w io.Writer) (n int, err error) {
 	var _n int
 
-	_n, err = m.Common.write1st(w)
+	_n, err = m.write1st(w)
 	if n += _n; err != nil {
 		return
 	}
@@ -289,7 +289,7 @@ func (m Pageview) Write(w io.Writer) (n int, err error) {
 		return n, err
 	}
 
-	_n, err = m.Common.writeRest(w)
+	_n, err = m.writeRest(w)
 	if n += _n; err != nil {
 		return
 	}
@@ -337,7 +337,7 @@ func (m *Exception) String() string {
 func (m Exception) Write(w io.Writer) (n int, err error) {
 	var _n int
 
-	_n, err = m.Common.write1st(w)
+	_n, err = m.write1st(w)
 	if n += _n; err != nil {
 		return
 	}
@@ -347,7 +347,7 @@ func (m Exception) Write(w io.Writer) (n int, err error) {
 		return n, err
 	}
 
-	_n, err = m.Common.writeRest(w)
+	_n, err = m.writeRest(w)
 	if n += _n; err != nil {
 		return
 	}
