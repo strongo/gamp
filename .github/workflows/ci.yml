@@ -26,4 +26,4 @@ jobs:
 
       - run: gcloud version
 
-      - uses: strongo/go-ci-action@v1.1.28
+      - uses: strongo/go-ci-action@v1.1.29
