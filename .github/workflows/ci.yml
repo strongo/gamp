@@ -26,4 +26,4 @@ jobs:
 
       - run: gcloud version
 
-      - uses: strongo/cicd@v1.17.1
+      - uses: strongo/cicd@v1.19.0
