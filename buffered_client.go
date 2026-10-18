@@ -63,7 +63,10 @@ func (api *BufferedClient) Queue(message Message) error {
 	}
 	api.Lock()
 	defer api.Unlock()
+	return api.queue(message)
+}
 
+func (api *BufferedClient) queue(message Message) error {
 	bufferSize := api.buffer.Len()
 
 	if api.queueDepth > 0 {
@@ -78,7 +81,7 @@ func (api *BufferedClient) Queue(message Message) error {
 		if err = api.flush(); err != nil {
 			return err
 		}
-		return api.Queue(message)
+		return api.queue(message)
 	}
 
 	if api.queueDepth++; api.queueDepth == 20 {
